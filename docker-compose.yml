@@ -1,0 +1,32 @@
+services:
+  # 1. Local Edge MQTT Broker Service
+  local-mqtt:
+    image: eclipse-mosquitto:2
+    container_name: edge_mosquitto
+    network_mode: host         # Share network with host (Jetson) so ESP32 can reach it easily
+    restart: always
+    volumes:
+      # Mount the configuration file created in Step 1
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  # 2. YOLO Edge AI Inference Service
+  yolo-backend:
+    image: ultralytics/ultralytics:latest-jetson-jetpack4
+    container_name: edge_yolo
+    runtime: nvidia            # Enable NVIDIA GPU
+    ipc: host                  # Share memory with host to optimize video processing
+    network_mode: host         # Share network to easily connect to local-mqtt via 127.0.0.1
+    restart: always
+    working_dir: /app
+    environment:
+      - PYTHONUNBUFFERED=1     # Log real-time từ ai_worker (dùng print, chạy trong process con)
+    volumes:
+      # Map thư mục source code (chứa main.py + package edge_gateway/) vào /app.
+      # main.py và edge_gateway/ phải nằm cùng cấp với file docker-compose.yml này.
+      - .:/app
+      - /tmp/argus_socket:/tmp/argus_socket  # Hardware mapping for CSI camera
+    depends_on:
+      - local-mqtt             # Ensure MQTT starts before AI backend
+    # Install dependencies, then run entrypoint duy nhất (main.py)
+    command: >
+      bash -c "pip3 install --no-cache-dir paho-mqtt httpx && python3 main.py"
