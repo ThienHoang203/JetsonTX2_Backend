@@ -18,6 +18,9 @@ services:
     network_mode: host         # Share network to easily connect to local-mqtt via 127.0.0.1
     restart: always
     working_dir: /app
+    env_file:
+      - path: .env             # Chứa GATEWAY_ID/MACHINE_A_IP thật, không commit (xem .env.example)
+        required: false
     environment:
       - PYTHONUNBUFFERED=1     # Log real-time từ ai_worker (dùng print, chạy trong process con)
     volumes:

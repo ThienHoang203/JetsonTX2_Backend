@@ -2,17 +2,35 @@
 Cấu hình tập trung cho Edge Gateway.
 Mọi module khác import từ đây (import config; config.GATEWAY_ID) để
 tránh circular import và để đổi cấu hình 1 chỗ duy nhất.
+
+Các giá trị gắn với hạ tầng thực tế (IP, ID gateway...) đọc từ biến môi
+trường (file .env, KHÔNG commit - xem .env.example) để tránh lộ thông tin
+nội bộ khi push code lên git. Giá trị default chỉ để chạy thử cục bộ.
 """
+import os
+
+# Nạp file .env (nếu có) vào os.environ trước khi đọc config bên dưới.
+# Không dùng thư viện ngoài (python-dotenv) để tránh thêm dependency chỉ cho
+# việc parse KEY=VALUE đơn giản. .env không được commit (xem .gitignore).
+_ENV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+if os.path.exists(_ENV_PATH):
+    with open(_ENV_PATH, encoding="utf-8") as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if not _line or _line.startswith("#") or "=" not in _line:
+                continue
+            _key, _val = _line.split("=", 1)
+            os.environ.setdefault(_key.strip(), _val.strip())
 
 # ================= GATEWAY / NETWORK =================
-GATEWAY_ID = "GTW-ST01-TX2A"
-MACHINE_A_IP = "192.168.1.93"
+GATEWAY_ID = os.environ.get("GATEWAY_ID", "GTW-ST01-TX2A")
+MACHINE_A_IP = os.environ.get("MACHINE_A_IP", "127.0.0.1")
 BACKEND_API_URL = f"http://{MACHINE_A_IP}:3001/api"
 
-LOCAL_MQTT_HOST = "127.0.0.1"
-LOCAL_MQTT_PORT = 1883
+LOCAL_MQTT_HOST = os.environ.get("LOCAL_MQTT_HOST", "127.0.0.1")
+LOCAL_MQTT_PORT = int(os.environ.get("LOCAL_MQTT_PORT", "1883"))
 CLOUD_MQTT_HOST = MACHINE_A_IP
-CLOUD_MQTT_PORT = 1883
+CLOUD_MQTT_PORT = int(os.environ.get("CLOUD_MQTT_PORT", "1883"))
 
 # ================= AI MODEL =================
 MODEL_PATH = "train-0-3.pt"
