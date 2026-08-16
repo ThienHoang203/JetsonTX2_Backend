@@ -50,3 +50,21 @@ VIBRATION_ALERT_MIN_DURATION_SEC = 6.0
 # Khoảng lặng tối đa giữa 2 mẫu "elevated" (>= warn_high) để vẫn coi là cùng
 # 1 đợt rung - tránh dao động nhỏ làm reset nhầm đồng hồ đo thời lượng.
 VIBRATION_EPISODE_RESET_GAP_SEC = 3.0
+
+# ================= DEFAULT / MOCK CONFIG =================
+DEFAULT_CONFIG = {
+    "nodes": {
+        "NOD-ST01-ESP01": {
+            "camera_id": "CAM-CSI-ST01-01",
+            "threshold": 15.0,
+            "warn_high": 2.5,
+            "alert_high": 15.0,
+            "critical_high": 25.0,
+        }
+    },
+    "cameras": {
+        "CAM-CSI-ST01-01": {"camera_type": "CSI"}
+    },
+}
+MOCK_CONFIG = DEFAULT_CONFIG
+

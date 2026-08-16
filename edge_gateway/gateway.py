@@ -1,6 +1,7 @@
 """
 EdgeGateway: điều phối MQTT local (ESP32) <-> MQTT cloud (backend) <-> AI worker process.
 """
+import copy
 import json
 import multiprocessing as mp
 import os
@@ -92,19 +93,8 @@ class EdgeGateway:
     # ---------- config ----------
     def load_mock_config(self):
         with self.config_lock:
-            self.config_cache = {
-                "nodes": {
-                    "NOD-ST01-ESP01": {
-                        "camera_id": "CAM-CSI-ST01-01",
-                        "threshold": 15.0,
-                        "warn_high": 2.5,
-                        "alert_high": 15.0,
-                        "critical_high": 25.0,
-                    }
-                },
-                "cameras": {"CAM-CSI-ST01-01": {"camera_type": "CSI"}},
-            }
-        log.info("Loaded MOCK configuration for local testing.")
+            self.config_cache = copy.deepcopy(config.DEFAULT_CONFIG)
+        log.info("Loaded MOCK configuration from config.py for local testing.")
 
     def fetch_initial_config(self):
         try:
